@@ -1,4 +1,4 @@
-const VIDEO_ID = 'dQw4w9WgXcQ'; // RECUERDA CAMBIAR ESTO POR TU ID
+const VIDEO_ID = 'HnL2pXGPBZs'; // RECUERDA CAMBIAR ESTO POR TU ID
 const REDIRECT_URL = 'https://omar0216.github.io/Sara/';
 
 let player;
