@@ -7,22 +7,28 @@
 body, html {
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow: hidden; /* Vital para que el zoom no cree barras de scroll */
     background-color: #000;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* PANTALLA DE INTRODUCCIÓN */
 #intro-screen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    /* Usamos dvh (Dynamic Viewport Height) para móviles. 
+       Esto arregla el centrado cuando aparecen/desaparecen las barras del navegador */
+    height: 100dvh; 
+    min-height: 100%; /* Fallback */
+    
     z-index: 100;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* Centrado Vertical */
+    align-items: center;     /* Centrado Horizontal */
+    
     background: linear-gradient(270deg, #ffdde1, #ee9ca7, #ffdde1);
     background-size: 400% 400%;
     animation: gradientAnimation 10s ease infinite;
@@ -39,15 +45,16 @@ body, html {
     text-align: center;
     padding: 20px;
     color: #5d4a4f;
+    width: 90%; /* Asegura que no toque los bordes en móviles estrechos */
+    max-width: 600px;
 }
 
 h1 {
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 5vw, 1.8rem); /* Tamaño adaptable a móvil/PC */
     margin-bottom: 40px;
     font-weight: 300;
     letter-spacing: 1px;
     line-height: 1.4;
-    max-width: 600px;
 }
 
 #btn-ver {
@@ -62,6 +69,9 @@ h1 {
     transition: all 0.3s ease;
     border-radius: 50px;
     outline: none;
+    
+    /* Prevenir que el tap en móviles deje un recuadro azul */
+    -webkit-tap-highlight-color: transparent;
 }
 
 #btn-ver:hover {
@@ -70,6 +80,11 @@ h1 {
     transform: scale(1.05);
 }
 
+#btn-ver:active {
+    transform: scale(0.95);
+}
+
+/* CONTENEDOR DEL VIDEO */
 #video-container {
     position: absolute;
     top: 0;
@@ -87,8 +102,7 @@ h1 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
+    /* width y height se controlan por JS */
 }
 
 iframe {
