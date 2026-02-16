@@ -1,4 +1,4 @@
-const VIDEO_ID = 'dQw4w9WgXcQ'; // RECUERDA CAMBIAR ESTO POR TU ID
+const VIDEO_ID = 'jrdRW7_7X44'; // RECUERDA CAMBIAR ESTO POR TU ID
 const REDIRECT_URL = 'https://omar0216.github.io/Sara/';
 
 let player;
@@ -25,8 +25,10 @@ const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 function onYouTubeIframeAPIReady() {
-    // Configuración base del reproductor
-    let playerConfig = {
+    // Detectamos origen válido (http/https)
+    const origin = window.location.protocol.startsWith('http') ? window.location.origin : undefined;
+
+    player = new YT.Player('player', {
         videoId: VIDEO_ID,
         playerVars: {
             'autoplay': 0,
@@ -39,22 +41,17 @@ function onYouTubeIframeAPIReady() {
             'showinfo': 0,
             'playsinline': 1,
             'enablejsapi': 1,
-            'host': 'https://www.youtube.com' // Ayuda a validar la sesión en incógnito/seguro
+            'origin': origin,
+            // INTENTO DE SOLUCIÓN PARA INCÓGNITO:
+            // Forzamos el host para ayudar a la API a validar la sesión
+            'host': 'https://www.youtube.com' 
         },
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange,
             'onError': onPlayerError
         }
-    };
-
-    // Solo si estamos en un servidor web real (http/https), enviamos el origen explícito.
-    // Esto ayuda a cumplir las políticas de seguridad de YouTube.
-    if (window.location.protocol.startsWith('http')) {
-        playerConfig.playerVars.origin = window.location.origin;
-    }
-
-    player = new YT.Player('player', playerConfig);
+    });
 }
 
 function onPlayerReady(event) {
@@ -65,7 +62,7 @@ function onPlayerReady(event) {
     btnVer.style.pointerEvents = "auto";
     btnVer.style.cursor = "pointer";
     
-    // Intentar forzar calidad, pero sin bloquear si falla
+    // Intentar forzar calidad
     try {
         player.setPlaybackQuality('highres'); 
     } catch(e) {}
@@ -76,24 +73,15 @@ function onPlayerReady(event) {
 function onPlayerError(event) {
     console.error("Error en reproductor de YouTube:", event.data);
     
-    // Lógica detallada de errores para depuración
+    // ERROR 150 / 101: Restricción de reproducción
     if(event.data === 150 || event.data === 101) {
-        let errorMsg = "No se puede reproducir el video.";
-        
-        // Si detectamos que se está ejecutando desde un archivo local
-        if (window.location.protocol === 'file:') {
-            errorMsg = "⚠️ ERROR DE ENTORNO LOCAL:\n\nYouTube bloquea la reproducción de videos con Copyright cuando abres el archivo HTML directamente (doble clic).\n\nSOLUCIÓN: Debes subir estos archivos a un servidor (como GitHub Pages) o usar un 'Localhost'. Al subirlo a la web, funcionará.";
-        } else {
-            errorMsg = "⚠️ BLOQUEO DE COPYRIGHT/PRIVACIDAD:\n\nYouTube ha bloqueado la reproducción externa.\n\nCAUSA PROBABLE: El video contiene música con Copyright (Sony, UMG, etc.) que prohíbe la reproducción fuera de YouTube.com, o estás en modo Incógnito estricto.\n\nPRUEBA: Cambia el VIDEO_ID por uno genérico para descartar errores de código.";
-        }
-        
-        alert(errorMsg);
+        // Mensaje simplificado ya que estás en web
+        alert("⚠️ NO SE PUEDE REPRODUCIR\n\nTu navegador o modo incógnito está bloqueando las cookies de YouTube necesarias para el video.\n\nPor favor intenta:\n1. Abrir en una ventana normal (no incógnito).\n2. Usar otro navegador.");
     }
 }
 
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        // Reintentar calidad alta
         try { player.setPlaybackQuality('highres'); } catch(e) {}
 
         setTimeout(() => {
@@ -125,10 +113,7 @@ btnVer.addEventListener('click', () => {
 
     player.unMute();
     player.setVolume(100);
-    
-    // Importante: setPlaybackQuality es una sugerencia, no una orden estricta
     player.setPlaybackQuality('highres');
-    
     player.playVideo();
 
     introScreen.style.opacity = '0';
