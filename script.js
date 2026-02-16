@@ -25,11 +25,8 @@ const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 function onYouTubeIframeAPIReady() {
-    // Detectamos si estamos en un servidor web (http/https) o archivo local (file)
-    // YouTube bloquea 'origin' si es 'file://', así que solo lo enviamos si es web.
-    const origin = window.location.protocol.startsWith('http') ? window.location.origin : undefined;
-
-    player = new YT.Player('player', {
+    // Configuración base del reproductor
+    let playerConfig = {
         videoId: VIDEO_ID,
         playerVars: {
             'autoplay': 0,
@@ -41,16 +38,24 @@ function onYouTubeIframeAPIReady() {
             'rel': 0,
             'showinfo': 0,
             'playsinline': 1,
-            'enablejsapi': 1,
-            'origin': origin, // Corrección automática del origen
-            'host': 'https://www.youtube.com' // Ayuda con restricciones de privacidad
+            'enablejsapi': 1
+            // NOTA: No forzamos 'origin' ni 'host' aquí manualmente para evitar conflictos
+            // en entornos locales (file://). La API intentará resolverlo sola.
         },
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange,
             'onError': onPlayerError
         }
-    });
+    };
+
+    // Solo si estamos en un servidor web real (http/https), enviamos el origen explícito.
+    // Esto ayuda a cumplir las políticas de seguridad de YouTube.
+    if (window.location.protocol.startsWith('http')) {
+        playerConfig.playerVars.origin = window.location.origin;
+    }
+
+    player = new YT.Player('player', playerConfig);
 }
 
 function onPlayerReady(event) {
@@ -61,20 +66,36 @@ function onPlayerReady(event) {
     btnVer.style.pointerEvents = "auto";
     btnVer.style.cursor = "pointer";
     
-    player.setPlaybackQuality('highres'); 
+    // Intentar forzar calidad, pero sin bloquear si falla
+    try {
+        player.setPlaybackQuality('highres'); 
+    } catch(e) {}
+    
     resizePlayer(); 
 }
 
 function onPlayerError(event) {
     console.error("Error en reproductor de YouTube:", event.data);
+    
+    // Lógica detallada de errores para depuración
     if(event.data === 150 || event.data === 101) {
-        alert("Error: Este video tiene bloqueada la reproducción externa. Si es tuyo, ve a YouTube Studio > Detalles > Mostrar más > y marca 'Permitir inserción'.");
+        let errorMsg = "No se puede reproducir el video.";
+        
+        // Si detectamos que se está ejecutando desde un archivo local
+        if (window.location.protocol === 'file:') {
+            errorMsg = "⚠️ ERROR DE ENTORNO LOCAL:\n\nYouTube bloquea la reproducción de videos con Copyright cuando abres el archivo HTML directamente (doble clic).\n\nSOLUCIÓN: Debes subir estos archivos a un servidor (como GitHub Pages) o usar un 'Localhost'. Al subirlo a la web, funcionará.";
+        } else {
+            errorMsg = "⚠️ ERROR DE RESTRICCIÓN:\n\nEl video no permite reproducción en este entorno (Incógnito o Bloqueo de Cookies).\nIntenta abrirlo en una ventana normal o verifica los permisos en YouTube Studio.";
+        }
+        
+        alert(errorMsg);
     }
 }
 
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        player.setPlaybackQuality('highres');
+        // Reintentar calidad alta
+        try { player.setPlaybackQuality('highres'); } catch(e) {}
 
         setTimeout(() => {
             blackCurtain.style.opacity = '0';
@@ -105,7 +126,10 @@ btnVer.addEventListener('click', () => {
 
     player.unMute();
     player.setVolume(100);
+    
+    // Importante: setPlaybackQuality es una sugerencia, no una orden estricta
     player.setPlaybackQuality('highres');
+    
     player.playVideo();
 
     introScreen.style.opacity = '0';
