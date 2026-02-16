@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Experiencia Exclusiva</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- PANTALLA DE INTRODUCCIÓN -->
+    <div id="intro-screen">
+        <div class="intro-content">
+            <h1>La escena post créditos de Percy Jackson que no viste...</h1>
+            <button id="btn-ver">Ver</button>
+            <p id="loading-text" style="display:none; color: #5d4a4f; margin-top: 10px; font-size: 0.9rem;">Cargando video...</p>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DEL VIDEO -->
+    <div id="video-container">
+        <!-- 
+            playsinline: Para que no se abra en fullscreen nativo de iPhone automáticamente 
+            preload="auto": Para que vaya descargando bytes antes de darle play
+        -->
+        <video id="main-video" playsinline webkit-playsinline preload="auto">
+            <!-- El src se pondrá via JS o puedes ponerlo aquí directo -->
+            Tu navegador no soporta video HTML5.
+        </video>
+        
+        <!-- Cortina negra para transiciones -->
+        <div id="black-curtain"></div>
+        
+        <!-- Bloqueador de interacciones (impide pausar/tocar) -->
+        <div id="interaction-blocker"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
