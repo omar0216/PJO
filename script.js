@@ -3,7 +3,7 @@ const REDIRECT_URL = 'https://omar0216.github.io/Sara/';
 
 let player;
 let isVideoReady = false;
-let currentZoomFactor = 1.35; // Zoom inicial fuerte para ocultar HUD
+let currentZoomFactor = 1.25; // Zoom inicial fuerte para ocultar HUD
 
 // Elementos del DOM
 const introScreen = document.getElementById('intro-screen');
@@ -43,6 +43,7 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
     isVideoReady = true;
+    player.setPlaybackQuality('highres');
     resizePlayer(); // Ajustar tamaño inicial con zoom
 }
 
