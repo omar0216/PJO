@@ -3,7 +3,7 @@ const REDIRECT_URL = 'https://omar0216.github.io/Sara/';
 
 let player;
 let isVideoReady = false;
-let currentZoomFactor = 1; // Zoom inicial fuerte para ocultar HUD
+let currentZoomFactor = 1.15; // Zoom inicial fuerte para ocultar HUD
 
 // Elementos del DOM
 const introScreen = document.getElementById('intro-screen');
