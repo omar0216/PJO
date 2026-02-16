@@ -4,7 +4,6 @@ const VIDEO_URL = 'https://www.dropbox.com/scl/fi/seuoupq2wdii0h3y0p88n/VN202602
 
 const REDIRECT_URL = 'https://omar0216.github.io/Sara/';
 
-// Elementos
 const introScreen = document.getElementById('intro-screen');
 const btnVer = document.getElementById('btn-ver');
 const loadingText = document.getElementById('loading-text');
@@ -12,14 +11,11 @@ const videoContainer = document.getElementById('video-container');
 const mainVideo = document.getElementById('main-video');
 const blackCurtain = document.getElementById('black-curtain');
 
-// Asignar fuente al video
 mainVideo.src = VIDEO_URL;
 
-// 2. ESTADO DE CARGA ESTRICTO
-// ---------------------------
 btnVer.disabled = true;
 btnVer.innerText = "Cargando 0%...";
-loadingText.innerText = "Preparando reproducción fluida..."; // Texto informativo
+loadingText.innerText = "Preparando reproducción...";
 loadingText.style.display = "block";
 
 // CAMBIO 1: Monitorear progreso de descarga para dar feedback visual
@@ -37,8 +33,6 @@ mainVideo.addEventListener('progress', () => {
     }
 });
 
-// CAMBIO 2: Usar 'canplaythrough' en lugar de 'canplay'
-// Esto obliga al navegador a esperar hasta calcular que puede reproducir TODO el video sin pausas.
 mainVideo.addEventListener('canplaythrough', () => {
     btnVer.disabled = false;
     btnVer.innerText = "Ver";
@@ -46,7 +40,6 @@ mainVideo.addEventListener('canplaythrough', () => {
     loadingText.style.display = "none";
 });
 
-// Evento: Si hay error cargando el video
 mainVideo.addEventListener('error', (e) => {
     console.error("Error cargando video", e);
     btnVer.innerText = "Error";
@@ -55,10 +48,7 @@ mainVideo.addEventListener('error', (e) => {
 });
 
 
-// 3. LÓGICA DE REPRODUCCIÓN
-// -------------------------
 btnVer.addEventListener('click', () => {
-    // Intentar Fullscreen
     requestFullScreenAndOrientation();
 
     // Reproducir
@@ -89,9 +79,6 @@ mainVideo.addEventListener('ended', () => {
     }, 100); 
 });
 
-
-// 4. UTILIDADES
-// -------------
 function requestFullScreenAndOrientation() {
     const docEl = document.documentElement;
 
