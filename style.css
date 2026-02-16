@@ -18,7 +18,7 @@ body, html {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100dvh; /* dvh para móviles */
+    height: 100dvh;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -78,7 +78,6 @@ h1 {
     cursor: wait;
 }
 
-/* VIDEO CONTAINER */
 #video-container {
     position: absolute;
     top: 0;
@@ -86,19 +85,15 @@ h1 {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    opacity: 0; /* Oculto al inicio */
+    opacity: 0;
     transition: opacity 0.5s ease-in;
     z-index: 1;
     background: #000;
 }
 
-/* VIDEO HTML5 NATIVO */
 video {
     width: 100%;
     height: 100%;
-    /* ESTO ES MAGIA: object-fit cover hace que el video llene la pantalla
-       sin deformarse, recortando lo que sobre automáticamente. 
-       Ya no necesitamos el JS complejo de resize. */
     object-fit: cover; 
     display: block;
 }
@@ -110,7 +105,7 @@ video {
     width: 100%;
     height: 100%;
     z-index: 50;
-    background: transparent; /* Invisible, bloquea clics */
+    background: transparent;
 }
 
 #black-curtain {
