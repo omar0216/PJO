@@ -1,4 +1,4 @@
-const VIDEO_ID = 'jrdRW7_7X44'; // RECUERDA CAMBIAR ESTO POR TU ID
+const VIDEO_ID = 'dQw4w9WgXcQ'; // RECUERDA CAMBIAR ESTO POR TU ID
 const REDIRECT_URL = 'https://omar0216.github.io/Sara/';
 
 let player;
@@ -38,9 +38,8 @@ function onYouTubeIframeAPIReady() {
             'rel': 0,
             'showinfo': 0,
             'playsinline': 1,
-            'enablejsapi': 1
-            // NOTA: No forzamos 'origin' ni 'host' aquí manualmente para evitar conflictos
-            // en entornos locales (file://). La API intentará resolverlo sola.
+            'enablejsapi': 1,
+            'host': 'https://www.youtube.com' // Ayuda a validar la sesión en incógnito/seguro
         },
         events: {
             'onReady': onPlayerReady,
@@ -85,7 +84,7 @@ function onPlayerError(event) {
         if (window.location.protocol === 'file:') {
             errorMsg = "⚠️ ERROR DE ENTORNO LOCAL:\n\nYouTube bloquea la reproducción de videos con Copyright cuando abres el archivo HTML directamente (doble clic).\n\nSOLUCIÓN: Debes subir estos archivos a un servidor (como GitHub Pages) o usar un 'Localhost'. Al subirlo a la web, funcionará.";
         } else {
-            errorMsg = "⚠️ ERROR DE RESTRICCIÓN:\n\nEl video no permite reproducción en este entorno (Incógnito o Bloqueo de Cookies).\nIntenta abrirlo en una ventana normal o verifica los permisos en YouTube Studio.";
+            errorMsg = "⚠️ BLOQUEO DE COPYRIGHT/PRIVACIDAD:\n\nYouTube ha bloqueado la reproducción externa.\n\nCAUSA PROBABLE: El video contiene música con Copyright (Sony, UMG, etc.) que prohíbe la reproducción fuera de YouTube.com, o estás en modo Incógnito estricto.\n\nPRUEBA: Cambia el VIDEO_ID por uno genérico para descartar errores de código.";
         }
         
         alert(errorMsg);
