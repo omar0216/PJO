@@ -12,6 +12,13 @@ const videoContainer = document.getElementById('video-container');
 const blackCurtain = document.getElementById('black-curtain');
 const playerWrapper = document.getElementById('player-wrapper');
 
+// --- MEJORA 1: FEEDBACK DE CARGA ---
+// Deshabilitamos el botón visualmente hasta que la API esté lista
+btnVer.innerText = "Cargando...";
+btnVer.style.opacity = "0.5";
+btnVer.style.pointerEvents = "none";
+btnVer.style.cursor = "default";
+
 // Cargar API de YouTube
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -32,26 +39,50 @@ function onYouTubeIframeAPIReady() {
             'showinfo': 0,
             'playsinline': 1,
             'enablejsapi': 1,
-            'origin': window.location.origin
+            'origin': window.location.origin // Importante para seguridad
         },
         events: {
             'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError // --- MEJORA 2: DETECCIÓN DE ERRORES ---
         }
     });
 }
 
 function onPlayerReady(event) {
     isVideoReady = true;
-    player.setPlaybackQuality('highres');
-    resizePlayer(); // Ajustar tamaño inicial con zoom
+    
+    // Habilitar el botón solo cuando el video esté listo para reproducirse
+    btnVer.innerText = "Ver";
+    btnVer.style.opacity = "1";
+    btnVer.style.pointerEvents = "auto";
+    btnVer.style.cursor = "pointer";
+    
+    // INTENTO DE FORZAR CALIDAD MÁXIMA (4K/HighRes)
+    player.setPlaybackQuality('highres'); 
+    
+    resizePlayer(); 
+}
+
+// Nueva función para manejar errores de carga del video
+function onPlayerError(event) {
+    console.error("Error en reproductor de YouTube:", event.data);
+    // Códigos de error comunes:
+    // 2: ID inválido
+    // 100: Video no encontrado o privado
+    // 101/150: El dueño del video no permite reproducción en sitios externos
+    if(event.data === 150 || event.data === 101) {
+        alert("El dueño de este video no permite reproducirlo fuera de YouTube. Por favor cambia el VIDEO_ID por uno que permita incrustación.");
+    }
 }
 
 function onPlayerStateChange(event) {
     // --- ESTADO: REPRODUCIENDO ---
     if (event.data === YT.PlayerState.PLAYING) {
         
-        // 1. Quitar cortina negra para mostrar el video
+        player.setPlaybackQuality('highres');
+
+        // 1. Quitar cortina negra
         setTimeout(() => {
             blackCurtain.style.opacity = '0';
             setTimeout(() => {
@@ -61,25 +92,17 @@ function onPlayerStateChange(event) {
 
         // 2. Quitar el Zoom después de 4 segundos
         setTimeout(() => {
-            currentZoomFactor = 1.0; // Volver a tamaño normal (cover)
-            
-            // Añadir transición para que el "des-zoom" sea suave
+            currentZoomFactor = 1.0; 
             playerWrapper.style.transition = 'width 1.5s ease-in-out, height 1.5s ease-in-out';
-            
-            resizePlayer(); // Aplicar nuevo tamaño
+            resizePlayer(); 
         }, 4000);
     }
 
     // --- ESTADO: TERMINADO (ENDED) ---
     if (event.data === YT.PlayerState.ENDED) {
-        // 1. Cortar a negro inmediatamente para tapar sugerencias
         blackCurtain.style.display = 'block';
-        
-        // Forzamos la opacidad a 1 sin transición para que sea instantáneo
         blackCurtain.style.transition = 'none'; 
         blackCurtain.style.opacity = '1';
-
-        // 2. Redirección inmediata
         window.location.href = REDIRECT_URL;
     }
 }
@@ -89,18 +112,22 @@ btnVer.addEventListener('click', () => {
 
     requestFullScreenAndOrientation();
 
-    // Desvanecer intro
+    // --- MEJORA CRÍTICA: REPRODUCCIÓN INMEDIATA ---
+    // Ejecutamos playVideo() INMEDIATAMENTE al hacer clic, sin setTimeout.
+    // Esto asegura que el navegador (Chrome/Safari/Incógnito) reconozca
+    // la intención del usuario y permita el sonido.
+    
+    player.unMute();
+    player.setVolume(100);
+    player.setPlaybackQuality('highres');
+    player.playVideo();
+
+    // Manejo visual (Desvanecimiento) separado del comando de video
     introScreen.style.opacity = '0';
+    videoContainer.style.opacity = '1'; 
     
     setTimeout(() => {
         introScreen.classList.add('hidden');
-        videoContainer.style.opacity = '1';
-        
-        player.unMute();
-        player.setVolume(100);
-        player.playVideo();
-        
-        // Forzar resize nuevamente al mostrar
         resizePlayer();
     }, 800);
 });
@@ -116,18 +143,14 @@ function resizePlayer() {
     
     let newWidth, newHeight;
 
-    // Calcular dimensiones base para cubrir la pantalla (object-fit: cover manual)
     if (windowRatio > videoRatio) {
-        // La pantalla es más ancha que el video
         newWidth = w;
         newHeight = w / videoRatio;
     } else {
-        // La pantalla es más alta que el video
         newHeight = h;
         newWidth = h * videoRatio;
     }
 
-    // Aplicar el factor de zoom actual (1.35 al inicio, 1.0 después)
     playerWrapper.style.width = (newWidth * currentZoomFactor) + 'px';
     playerWrapper.style.height = (newHeight * currentZoomFactor) + 'px';
 }
@@ -137,7 +160,6 @@ window.addEventListener('resize', resizePlayer);
 function requestFullScreenAndOrientation() {
     const docEl = document.documentElement;
 
-    // Intentar pantalla completa
     if (docEl.requestFullscreen) {
         docEl.requestFullscreen().catch(err => {});
     } else if (docEl.webkitRequestFullscreen) {
@@ -146,7 +168,6 @@ function requestFullScreenAndOrientation() {
         docEl.msRequestFullscreen();
     }
 
-    // Intentar bloquear orientación horizontal (solo Android/Móvil compatible)
     if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(err => {});
     }
